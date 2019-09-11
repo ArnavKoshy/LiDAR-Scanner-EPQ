@@ -13,16 +13,14 @@ It is written for a VL53L1X board using the ST api and a PCA9685 board using the
 // Set up default servo class at address 0x40
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
-//The maximum limits of the servo. These are WRONG for the moment. Calibration is needed
 #define SERVO_MIN 100
-
 #define SERVO_MAX 470
 
 VL53L1_Dev_t                   dev;
 VL53L1_DEV                     Dev = &dev;
 int status;
 
-
+// Function to send the servo positions and distances to PC
 void sendRanging(uint16_t i, uint16_t j){
   static VL53L1_RangingMeasurementData_t RangingData;
 
@@ -50,7 +48,8 @@ void sendRanging(uint16_t i, uint16_t j){
     delay(0.01);
   }
 }
-  
+
+// Runs this first
 void setup()
 {
   uint8_t byteData;
@@ -66,7 +65,8 @@ void setup()
   Dev->I2cDevAddr = 0x52;
 
   VL53L1_software_reset(Dev);
-
+  
+  // Set up sensor
   VL53L1_RdByte(Dev, 0x010F, &byteData);
   Serial.print(F("VL53L1X Model_ID: "));
   Serial.println(byteData, HEX);
@@ -76,7 +76,8 @@ void setup()
   VL53L1_RdWord(Dev, 0x010F, &wordData);
   Serial.print(F("VL53L1X: "));
   Serial.println(wordData, HEX);
-
+  
+  // Initialise sensor and configure ROI
   status = VL53L1_WaitDeviceBooted(Dev);
   status = VL53L1_DataInit(Dev);
   status = VL53L1_StaticInit(Dev);
@@ -99,7 +100,8 @@ void setup()
 
 void loop()
 {
-//  delay(50);
+
+// Loop through positions and scan back and forth
 for(uint16_t j = (SERVO_MIN + SERVO_MAX)/2; j<SERVO_MAX; j=j+5){
 
 for(uint16_t i = SERVO_MIN +50; i<SERVO_MAX - 50; i=i+2){
